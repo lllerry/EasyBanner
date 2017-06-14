@@ -15,6 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Scroller;
 
+import com.lerry.banner.transformer.ScalePageTransformer;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +34,8 @@ public class EasyBanner extends FrameLayout {
 
     //默认循环方式是
     private static int LOOP_TYPE = BannerConfig.LOOP_DEFAULT;
+
+    private long mDelayTime = BannerConfig.DEFALUT_LOOP_TIME;
 
     public EasyBanner(@NonNull Context context) {
         this(context, null);
@@ -114,11 +118,30 @@ public class EasyBanner extends FrameLayout {
         return this;
     }
 
+    public EasyBanner setAnimation(TransformerMode transformerMode) {
+        switch (transformerMode) {
+            case Scale:
+                mViewpager.setPageTransformer(false, new ScalePageTransformer());
+            case Alpha:
+                break;
+            default:
+                break;
+        }
+        return this;
+    }
+
+    public enum TransformerMode {
+
+        Scale, Alpha
+
+    }
+
     private void startAutoPlay() {
         mhandler.post(mRunnable);
     }
 
     private static Handler mhandler = new Handler();
+
 
     private Runnable mRunnable = new Runnable() {
         @Override
@@ -128,13 +151,19 @@ public class EasyBanner extends FrameLayout {
             if (currentItem == mAdapter.getCount() - 1) {
                 currentItem = 0;
                 mViewpager.setCurrentItem(currentItem, false);
-                mhandler.postDelayed(this, BannerConfig.DEFALUT_LOOP_TIME);
+                mhandler.postDelayed(this, mDelayTime);
             } else {
                 mViewpager.setCurrentItem(currentItem);
-                mhandler.postDelayed(this, BannerConfig.DEFALUT_LOOP_TIME);
+                mhandler.postDelayed(this, mDelayTime);
             }
         }
     };
+
+    //设置轮播间隔事件
+    public EasyBanner setDelayTime(long delayTime) {
+        mDelayTime = delayTime < 1500 ? 1500 : delayTime;
+        return this;
+    }
 
     static class ViewPagerAdapter<T> extends PagerAdapter {
         private List<T> mDatas;
@@ -169,7 +198,6 @@ public class EasyBanner extends FrameLayout {
             return view;
         }
 
-
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
@@ -187,7 +215,6 @@ public class EasyBanner extends FrameLayout {
             mBindViewHandler.bind(imageView, realPosition);
             return imageView;
         }
-
     }
 
 
@@ -210,12 +237,12 @@ public class EasyBanner extends FrameLayout {
 
         @Override
         public void startScroll(int startX, int startY, int dx, int dy) {
-            super.startScroll(startX, startY, dx, dy, mDuration);
+            super.startScroll(startX, startY, dx, dy, mDuration > 1500 ? 1500 : mDuration);
         }
 
         @Override
         public void startScroll(int startX, int startY, int dx, int dy, int duration) {
-            super.startScroll(startX, startY, dx, dy, mDuration);
+            super.startScroll(startX, startY, dx, dy, mDuration > 1500 ? 1500 : mDuration);
         }
     }
 

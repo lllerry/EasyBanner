@@ -13,5 +13,5 @@ public class BannerConfig {
     public static final int LOOP_DEFAULT = LOOP_LIMITED;
 
     //设置循环时间
-    public static final int DEFALUT_LOOP_TIME = 5000;
+    public static final long DEFALUT_LOOP_TIME = 2000;
 }

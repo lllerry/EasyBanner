@@ -21,6 +21,6 @@ public class MainActivity extends AppCompatActivity {
             public void bind(ImageView imageView, int position) {
                 imageView.setImageResource(integers[position]);
             }
-        }).loop(BannerConfig.LOOP_INFINITY).autoPlay();
+        }).loop(BannerConfig.LOOP_INFINITY).autoPlay().setAnimation(EasyBanner.TransformerMode.Scale).setDelayTime(5000);
     }
 }
