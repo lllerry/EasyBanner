@@ -1,4 +1,4 @@
-package com.lerry.library;
+package com.lerry.banner;
 
 import org.junit.Test;
 

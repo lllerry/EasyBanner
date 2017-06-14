@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
-import com.lerry.library.BannerConfig;
-import com.lerry.library.EasyBanner;
+import com.lerry.banner.BannerConfig;
+import com.lerry.banner.EasyBanner;
 
 public class MainActivity extends AppCompatActivity {
 

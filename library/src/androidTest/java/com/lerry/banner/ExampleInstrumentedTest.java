@@ -1,4 +1,4 @@
-package com.lerry.library;
+package com.lerry.banner;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

@@ -1,4 +1,4 @@
-package com.lerry.library;
+package com.lerry.banner;
 
 /**
  * Created by lerry on 14/06/2017.

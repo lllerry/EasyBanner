@@ -1,4 +1,4 @@
-package com.lerry.library;
+package com.lerry.banner;
 
 import android.content.Context;
 import android.os.Handler;
@@ -10,9 +10,12 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Scroller;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,11 +53,27 @@ public class EasyBanner extends FrameLayout {
     }
 
 
+    private void initViewPagerScroll() {
+        Field mScroller;
+        try {
+            mScroller = ViewPager.class.getDeclaredField("mScroller");
+            mScroller.setAccessible(true);
+            ViewPagerScroller viewPagerScroller = new ViewPagerScroller(mContext);
+            mScroller.set(mViewpager, viewPagerScroller);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mViewpager = (ViewPager) findViewById(R.id.viewpager);
         mViewpager.setOffscreenPageLimit(3);
+        initViewPagerScroll();
     }
 
 
@@ -169,6 +188,35 @@ public class EasyBanner extends FrameLayout {
             return imageView;
         }
 
+    }
+
+
+    //设置滚动的事件
+    static class ViewPagerScroller extends Scroller {
+        //默认duration
+        private int mDuration = 1000;
+
+        public ViewPagerScroller(Context context) {
+            super(context);
+        }
+
+        public ViewPagerScroller(Context context, Interpolator interpolator) {
+            super(context, interpolator);
+        }
+
+        public ViewPagerScroller(Context context, Interpolator interpolator, boolean flywheel) {
+            super(context, interpolator, flywheel);
+        }
+
+        @Override
+        public void startScroll(int startX, int startY, int dx, int dy) {
+            super.startScroll(startX, startY, dx, dy, mDuration);
+        }
+
+        @Override
+        public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+            super.startScroll(startX, startY, dx, dy, mDuration);
+        }
     }
 
     public interface BindViewHandler {
