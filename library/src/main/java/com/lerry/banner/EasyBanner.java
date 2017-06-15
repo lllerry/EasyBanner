@@ -15,7 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Scroller;
 
-import com.lerry.banner.transformer.ScalePageTransformer;
+import com.lerry.banner.transformer.ScaleTransfromer;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -56,6 +56,11 @@ public class EasyBanner extends FrameLayout {
         mAdapter = ViewPagerAdapter.create();
     }
 
+    //解决wrap_content无效问题
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
 
     private void initViewPagerScroll() {
         Field mScroller;
@@ -83,8 +88,7 @@ public class EasyBanner extends FrameLayout {
 
     //设置数据
     public <T> EasyBanner setPages(T[] pages, BindViewHandler bindViewHandler) {
-        setPages(Arrays.asList(pages), bindViewHandler);
-        return this;
+        return setPages(Arrays.asList(pages), bindViewHandler);
     }
 
     //设置数据
@@ -121,7 +125,7 @@ public class EasyBanner extends FrameLayout {
     public EasyBanner setAnimation(TransformerMode transformerMode) {
         switch (transformerMode) {
             case Scale:
-                mViewpager.setPageTransformer(false, new ScalePageTransformer());
+                mViewpager.setPageTransformer(false, new PageTransformer.Builder().transfromer(new ScaleTransfromer()).build());
             case Alpha:
                 break;
             default:
@@ -203,6 +207,7 @@ public class EasyBanner extends FrameLayout {
             container.removeView((View) object);
         }
 
+        //真实的图片的数量
         public int getRealCount() {
             return mDatas.size();
         }
@@ -216,7 +221,6 @@ public class EasyBanner extends FrameLayout {
             return imageView;
         }
     }
-
 
     //设置滚动的事件
     static class ViewPagerScroller extends Scroller {
