@@ -11,7 +11,6 @@
         android:id="@+id/easy"
         android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:background="#f00"
         app:left_space="20dp"
         app:page_margin="20dp"
         app:right_space="20dp"

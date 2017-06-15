@@ -6,7 +6,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.lerry.banner.BannerConfig;
 import com.lerry.banner.EasyBanner;
+import com.lerry.banner.transformer.ScaleTransfromer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(view.getContext(), position + "", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setPageMargin(10)
-                .setDelayTime(3000);
-
+                .loop(BannerConfig.LOOP_INFINITY)
+                .setAnimation(new ScaleTransfromer.Builder().build())
+                .autoPlay();
     }
 }
