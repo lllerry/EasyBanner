@@ -10,5 +10,11 @@
     <com.lerry.banner.EasyBanner
         android:id="@+id/easy"
         android:layout_width="match_parent"
-        android:layout_height="140dp"/>
+        android:layout_height="140dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:background="#f00"
+        app:left_space="20dp"
+        app:right_space="20dp"
+        />
 </FrameLayout>

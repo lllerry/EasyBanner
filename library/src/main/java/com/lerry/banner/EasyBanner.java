@@ -1,6 +1,7 @@
 package com.lerry.banner;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,7 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Scroller;
 
-import com.lerry.banner.transformer.ScaleTransfromer;
+import com.lerry.banner.transformer.Transformer;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -31,11 +32,16 @@ public class EasyBanner extends FrameLayout {
     private Context mContext;
     private ViewPager mViewpager;
     private ViewPagerAdapter mAdapter;
+    private boolean isAutoPlay = true; //是否轮播
 
     //默认循环方式是
     private static int LOOP_TYPE = BannerConfig.LOOP_DEFAULT;
 
     private long mDelayTime = BannerConfig.DEFALUT_LOOP_TIME;
+    //4个边距
+    private int mLeft_space;
+    private int mRight_space;
+
 
     public EasyBanner(@NonNull Context context) {
         this(context, null);
@@ -48,6 +54,10 @@ public class EasyBanner extends FrameLayout {
     public EasyBanner(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.EasyBanner, defStyleAttr, -1);
+        mLeft_space = (int) typedArray.getDimension(R.styleable.EasyBanner_left_space, 0);
+        mRight_space = (int) typedArray.getDimension(R.styleable.EasyBanner_right_space, 0);
+        typedArray.recycle();
         init();
     }
 
@@ -60,6 +70,46 @@ public class EasyBanner extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+
+    private ViewPager.OnPageChangeListener mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+            //根据状态,切换是否自动轮播
+            switch (state) {
+                case ViewPager.SCROLL_STATE_DRAGGING:
+                    //被拖拽的时候停止自动轮播
+                    isAutoPlay = false;
+                    break;
+                case ViewPager.SCROLL_STATE_IDLE:
+                    //空闲的时候开启自动轮播
+                    isAutoPlay = true;
+                    break;
+            }
+        }
+    };
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mViewpager = (ViewPager) findViewById(R.id.viewpager);
+        FrameLayout.LayoutParams layoutParams = (LayoutParams) mViewpager.getLayoutParams();
+        layoutParams.setMargins(mLeft_space, 0, mRight_space, 0);
+        mViewpager.requestLayout();
+        mViewpager.setOffscreenPageLimit(3);
+        mViewpager.addOnPageChangeListener(mOnPageChangeListener);
+        initViewPagerScroll();
     }
 
     private void initViewPagerScroll() {
@@ -75,16 +125,6 @@ public class EasyBanner extends FrameLayout {
             e.printStackTrace();
         }
     }
-
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mViewpager = (ViewPager) findViewById(R.id.viewpager);
-        mViewpager.setOffscreenPageLimit(3);
-        initViewPagerScroll();
-    }
-
 
     //设置数据
     public <T> EasyBanner setPages(T[] pages, BindViewHandler bindViewHandler) {
@@ -122,22 +162,13 @@ public class EasyBanner extends FrameLayout {
         return this;
     }
 
-    public EasyBanner setAnimation(TransformerMode transformerMode) {
-        switch (transformerMode) {
-            case Scale:
-                mViewpager.setPageTransformer(false, new PageTransformer.Builder().transfromer(new ScaleTransfromer()).build());
-            case Alpha:
-                break;
-            default:
-                break;
-        }
+
+    public EasyBanner setAnimation(Transformer transformer) {
+
+        mViewpager.setPageTransformer(false,
+                new PageTransformer.Builder().transfromer(transformer).build());
+
         return this;
-    }
-
-    public enum TransformerMode {
-
-        Scale, Alpha
-
     }
 
     private void startAutoPlay() {
@@ -150,16 +181,22 @@ public class EasyBanner extends FrameLayout {
     private Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
-            int currentItem = mViewpager.getCurrentItem();
-            currentItem++;
-            if (currentItem == mAdapter.getCount() - 1) {
-                currentItem = 0;
-                mViewpager.setCurrentItem(currentItem, false);
-                mhandler.postDelayed(this, mDelayTime);
+            if (isAutoPlay) {
+                int currentItem = mViewpager.getCurrentItem();
+                currentItem++;
+                if (currentItem == mAdapter.getCount() - 1) {
+                    currentItem = 0;
+                    mViewpager.setCurrentItem(currentItem, false);
+                    mhandler.postDelayed(this, mDelayTime);
+                } else {
+                    mViewpager.setCurrentItem(currentItem);
+                    mhandler.postDelayed(this, mDelayTime);
+                }
             } else {
-                mViewpager.setCurrentItem(currentItem);
+                //发送消息，不轮播
                 mhandler.postDelayed(this, mDelayTime);
             }
+
         }
     };
 
@@ -208,26 +245,38 @@ public class EasyBanner extends FrameLayout {
         }
 
         //真实的图片的数量
-        public int getRealCount() {
+        int getRealCount() {
             return mDatas.size();
         }
 
         private View getView(ViewGroup container, int position) {
-            int realPosition = LOOP_TYPE == 1 ? position : position % getRealCount();
+            final int realPosition = LOOP_TYPE == 1 ? position : position % getRealCount();
+            //
             //设置数据
             ImageView imageView = (ImageView) LayoutInflater.from(container.getContext()).inflate(R.layout.viewpager_item, container, false);
+
+            imageView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mBindViewHandler != null) {
+                        mBindViewHandler.onClick(v, realPosition);
+                    }
+                }
+            });
             //回调设置数据
-            mBindViewHandler.bind(imageView, realPosition);
+            if (mBindViewHandler != null) {
+                mBindViewHandler.bind(imageView, realPosition);
+            }
             return imageView;
         }
     }
 
-    //设置滚动的事件
-    static class ViewPagerScroller extends Scroller {
+    //设置viewpager滚动的动画时间
+    private static class ViewPagerScroller extends Scroller {
         //默认duration
         private int mDuration = 1000;
 
-        public ViewPagerScroller(Context context) {
+        ViewPagerScroller(Context context) {
             super(context);
         }
 
@@ -252,5 +301,7 @@ public class EasyBanner extends FrameLayout {
 
     public interface BindViewHandler {
         void bind(ImageView imageView, int position);
+
+        void onClick(View view, int position);
     }
 }
