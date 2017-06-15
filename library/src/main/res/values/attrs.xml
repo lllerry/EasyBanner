@@ -3,5 +3,10 @@
     <declare-styleable name="EasyBanner">
         <attr name="left_space" format="dimension"/>
         <attr name="right_space" format="dimension"/>
+        <attr name="mode" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="loop" value="1"/>
+        </attr>
+        <attr name="page_margin" format="dimension"/>
     </declare-styleable>
 </resources>

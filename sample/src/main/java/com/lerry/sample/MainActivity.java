@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.lerry.banner.BannerConfig;
 import com.lerry.banner.EasyBanner;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,8 +29,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(view.getContext(), position + "", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .loop(BannerConfig.LOOP_INFINITY)
-                .autoPlay()
+                .setPageMargin(10)
                 .setDelayTime(3000);
 
     }

@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.Scroller;
 
 import com.lerry.banner.transformer.Transformer;
+import com.lerry.banner.util.ConvertUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -41,6 +42,10 @@ public class EasyBanner extends FrameLayout {
     //4个边距
     private int mLeft_space;
     private int mRight_space;
+    //循环还是普通轮播图
+    private int mMode;
+    //页面间距
+    private int mPage_margin;
 
 
     public EasyBanner(@NonNull Context context) {
@@ -57,6 +62,8 @@ public class EasyBanner extends FrameLayout {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.EasyBanner, defStyleAttr, -1);
         mLeft_space = (int) typedArray.getDimension(R.styleable.EasyBanner_left_space, 0);
         mRight_space = (int) typedArray.getDimension(R.styleable.EasyBanner_right_space, 0);
+//        mMode = typedArray.getInt(R.styleable.EasyBanner_mode, 0);
+        mPage_margin = (int) typedArray.getDimension(R.styleable.EasyBanner_page_margin, 0);
         typedArray.recycle();
         init();
     }
@@ -108,8 +115,14 @@ public class EasyBanner extends FrameLayout {
         layoutParams.setMargins(mLeft_space, 0, mRight_space, 0);
         mViewpager.requestLayout();
         mViewpager.setOffscreenPageLimit(3);
+        mViewpager.setPageMargin(ConvertUtils.dp2px(mContext, mPage_margin));
         mViewpager.addOnPageChangeListener(mOnPageChangeListener);
         initViewPagerScroll();
+
+//        if (mMode == 1) {
+//            //轮训
+//            loop(BannerConfig.LOOP_INFINITY).autoPlay().setDelayTime(mDelayTime);
+//        }
     }
 
     private void initViewPagerScroll() {
@@ -203,6 +216,12 @@ public class EasyBanner extends FrameLayout {
     //设置轮播间隔事件
     public EasyBanner setDelayTime(long delayTime) {
         mDelayTime = delayTime < 1500 ? 1500 : delayTime;
+        return this;
+    }
+
+    //设置page margin
+    public EasyBanner setPageMargin(int marginPixels) {
+        mViewpager.setPageMargin(marginPixels);
         return this;
     }
 
